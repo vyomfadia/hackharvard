@@ -1,16 +1,28 @@
 export function floodfill(data: number[][], x: number, y: number, v: number) {
-    if (x < 0 || x >= data.length || y < 0 || y >= data[0].length)
-        return;
+    const rows = data.length;
+    const cols = data[0].length;
+    
+    // Use a stack for iterative flood fill
+    const stack: [number, number, number][] = [[x, y, v]];
 
-    if (Math.abs(v) <= 0.25)
-        return;
+    while (stack.length > 0) {
+        const [currX, currY, currV] = stack.pop()!;
 
-    if (Math.abs(v) <= 4)
-        return;
+        // Boundary checks
+        if (currX < 0 || currX >= rows || currY < 0 || currY >= cols) continue;
 
-    data[x][y] = Math.max(v, data[x][y]);
-    floodfill(data, x + 1, y, v - (4 * Math.sign(v)));
-    floodfill(data, x - 1, y, v - (4 * Math.sign(v)));
-    floodfill(data, x, y + 1, v - (4 * Math.sign(v)));
-    floodfill(data, x, y - 1, v - (4 * Math.sign(v)));
+        // Skip if value is below thresholds
+        if (Math.abs(currV) <= 0.25 || Math.abs(currV) <= 4) continue;
+
+        // Update the value only if it's higher
+        if (data[currX][currY] < currV) {
+            data[currX][currY] = currV;
+
+            // Push adjacent cells onto the stack
+            stack.push([currX + 1, currY, currV - 4 * Math.sign(currV)]);
+            stack.push([currX - 1, currY, currV - 4 * Math.sign(currV)]);
+            stack.push([currX, currY + 1, currV - 4 * Math.sign(currV)]);
+            stack.push([currX, currY - 1, currV - 4 * Math.sign(currV)]);
+        }
+    }
 }

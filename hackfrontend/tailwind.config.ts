@@ -16,7 +16,11 @@ const config: Config = {
             colors: {
                 background: "var(--background)",
                 foreground: "var(--foreground)",
+                backgreen: "var(--backgreen)",
             },
+            gridTemplateRows: {
+              '21': 'repeat(21, minmax(0, 1fr))',
+            }
         },
     },
     plugins: [],
