@@ -1,9 +1,85 @@
-import Image from "next/image";
+"use client";
+
+import {useEffect, useState} from "react";
+import {floodfill} from "@/lib/floodfill";
 
 export default function Home() {
-  return (
-    <div className="min-h-screen min-w-full flex justify-center items-center">
-      hello!
-    </div>
-  );
+    const [matrixLeftFoot, setMatrixLeftFoot] = useState<number[][] | null>(null);
+    const [matrixRightFoot, setMatrixRightFoot] = useState<number[][] | null>(null);
+
+    const [baseV, setBaseV] = useState(0);
+
+    useEffect(() => {
+        setMatrixLeftFoot(() => {
+            const data = []
+            for (let i = 0; i < 8; i++) {
+                data.push(new Array(16).fill(0));
+            }
+
+            return data;
+        })
+
+        function f() {
+            setBaseV((prev) => {
+                const newVal = prev + 1;
+                setMatrixLeftFoot((prev) => {
+                    if (prev) floodfill(prev, 5, 5, Math.random() * 2 * (newVal % 50 > 25 ? -1 : 1), new Set<number>());
+                    return prev;
+                });
+
+                console.log('newVal', newVal);
+                return newVal;
+            })
+
+            setTimeout(() => f(), 100);
+        }
+
+        setTimeout(() => f(), 100);
+    }, []);
+
+    return (
+        <div className="min-h-screen min-w-full flex justify-center items-center">
+            <div
+                className="flex min-h-[50vh] min-w-[50rem] border-[1px] border-gray-500 rounded-2xl justify-between p-2">
+                {/* we need an 'led matrix' */}
+                <div className="flex flex-row">
+                    {
+                        matrixLeftFoot?.map((sub, i) => {
+                            return (
+                                <div key={i} className="flex flex-col">
+                                    {
+                                        sub.map((v, j) => (
+                                            <div key={i * 16 + j}
+                                                 className="flex justify-center items-center w-12 h-12 border-[1px] border-gray-500" style={{backgroundColor: `rgb(${Math.max(255 - v * 2, 150)}, ${Math.max(255 - v * 2, 150)}, ${255})`}}>
+                                                {v.toFixed(2)}
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                            )
+                        })
+                    }
+                </div>
+
+                <div className="flex flex-row">
+                    {
+                        matrixRightFoot?.map((sub, i) => {
+                            return (
+                                <div key={i} className="flex flex-col">
+                                    {
+                                        sub.map((v, j) => (
+                                            <div key={i * 16 + j}
+                                                 className="flex justify-center items-center w-6 h-6 border-[1px] border-gray-500">
+                                                {v}
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                            )
+                        })
+                    }
+                </div>
+            </div>
+        </div>
+    );
 }
