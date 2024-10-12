@@ -1,18 +1,16 @@
-export function floodfill(data: number[][], x: number, y: number, v: number, visited: Set<number>) {
+export function floodfill(data: number[][], x: number, y: number, v: number) {
     if (x < 0 || x >= data.length || y < 0 || y >= data[0].length)
         return;
 
     if (Math.abs(v) <= 0.25)
         return;
 
-    if (visited.has(x * data[0].length + y))
+    if (Math.abs(v) <= 4)
         return;
 
-    visited.add(x * data[0].length + y);
-
-    data[x][y] += v;
-    floodfill(data, x + 1, y, v - (0.22 * Math.sign(v)), visited);
-    floodfill(data, x - 1, y, v - (0.22 * Math.sign(v)), visited);
-    floodfill(data, x, y + 1, v - (0.22 * Math.sign(v)), visited);
-    floodfill(data, x, y - 1, v - (0.22 * Math.sign(v)), visited);
+    data[x][y] = Math.max(v, data[x][y]);
+    floodfill(data, x + 1, y, v - (4 * Math.sign(v)));
+    floodfill(data, x - 1, y, v - (4 * Math.sign(v)));
+    floodfill(data, x, y + 1, v - (4 * Math.sign(v)));
+    floodfill(data, x, y - 1, v - (4 * Math.sign(v)));
 }

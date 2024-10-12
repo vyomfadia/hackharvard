@@ -1,11 +1,12 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {floodfill} from "@/lib/floodfill";
 
 export default function Home() {
     const [matrixLeftFoot, setMatrixLeftFoot] = useState<number[][] | null>(null);
     const [matrixRightFoot, setMatrixRightFoot] = useState<number[][] | null>(null);
+    const flipper = useRef<bool>(false);
 
     const [baseV, setBaseV] = useState(0);
 
@@ -21,13 +22,21 @@ export default function Home() {
 
         function f() {
             setBaseV((prev) => {
-                const newVal = prev + 1;
+                if (prev >= 25) flipper.current = true;
+                if (prev <= 0) flipper.current = false;
+
+                const newVal = prev + (flipper.current ? -1 : 1);
                 setMatrixLeftFoot((prev) => {
-                    if (prev) floodfill(prev, 5, 5, Math.random() * 2 * (newVal % 50 > 25 ? -1 : 1), new Set<number>());
-                    return prev;
+                    const data = []
+                    for (let i = 0; i < 8; i++) {
+                        data.push(new Array(16).fill(0));
+                    }
+
+                    floodfill(data, 5, 5, newVal);
+                    floodfill(data, 1, 15, newVal * 2);
+                    return data;
                 });
 
-                console.log('newVal', newVal);
                 return newVal;
             })
 
