@@ -8,6 +8,7 @@ import LogoutSVG from "./svgs/logout.svg";
 import React, {
   createContext,
   memo,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -16,6 +17,57 @@ import { floodfill } from "@/lib/floodfill";
 import { patients } from "@/lib/mockData";
 import Image from "next/image";
 import { Patient } from "@/lib/types";
+import { TrendingUp, X } from "lucide-react";
+import { CartesianGrid, Dot, Line, LineChart, XAxis } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import Radial from "./radial";
+import Cube from "./three";
+
+function seededRandom(seed) {
+  let x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+const chartData = (seed) => {
+  const days = ["Wed", "Thu", "Fri", "Sat", "Sun"];
+  const chartData = [];
+
+  days.forEach((day, index) => {
+    const accuracy = Math.floor(seededRandom(seed + index) * 100); // random accuracy between 0 and 100
+    const fill = "#00ffff"; // fixed fill color
+    chartData.push({ day, accuracy, fill });
+  });
+
+  return chartData;
+};
+
+const chartConfig = {
+  Wed: {
+    label: "Wednesday",
+    color: "#00ffff",
+  },
+  Thu: {
+    label: "Thursday",
+    color: "#00ffff",
+  },
+  Fri: {
+    label: "Friday",
+    color: "#00ffff",
+  },
+  Sat: {
+    label: "Saturday",
+    color: "#00ffff",
+  },
+  Sun: {
+    label: "Sunday",
+    color: "#00ffff",
+  },
+} satisfies ChartConfig;
 
 interface PatientContextValue {
   patient: Patient | null;
@@ -56,6 +108,14 @@ const Matrix = memo(({ matrix }: { matrix: number[][] }) => (
 ));
 
 export default function Home() {
+  const points = [
+    { x: 50, y: 100 },
+    { x: 150, y: 200 },
+    { x: 250, y: 150 },
+    { x: 350, y: 250 },
+    { x: 450, y: 100 },
+  ];
+
   const sectionHeaderRefs = [
     useRef<HTMLDivElement>(null),
     useRef<HTMLDivElement>(null),
@@ -130,12 +190,12 @@ export default function Home() {
         </div>
         <div className="flex gap-4 items-center">
           <p className="text-white text-2xl font-light">Dr. Mathew</p>
-          <Image 
-          width={40}
-          height={40}
-          src="/Dr.png"
-          alt="Dr. Mathew"
-          className="w-10 h-10 rounded-full"
+          <Image
+            width={40}
+            height={40}
+            src="/Dr.png"
+            alt="Dr. Mathew"
+            className="w-10 h-10 rounded-full"
           />
         </div>
       </div>
@@ -266,14 +326,63 @@ export default function Home() {
             Recent Activity
             <div className="flex-grow h-[1px] bg-white/40 rounded-r-full" />
           </div>
-          <div className="grid grid-cols-[1fr_1fr_1fr] grid-rows-[300px_300px] gap-5 mb-10">
-            <div className="w-full h-full backdrop-blur-sm bg-white/5 p-6 rounded-2xl shadow-lg relative ">
+          <div className="grid grid-cols-[1fr_2fr] grid-rows-[300px_300px] gap-5 mb-10">
+            <div className="w-full h-full backdrop-blur-sm bg-white/5 p-6 rounded-2xl shadow-lg relative col-span-1 overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-full border border-[#d0ffffa1] mask-gradient-2 rounded-2xl" />
               <span className="text-white/80">Step Accuracy</span>
+
+              <ChartContainer config={chartConfig} className="w-full h-full">
+                <LineChart
+                  accessibilityLayer
+                  data={chartData(_patient?.recentData)}
+                  margin={{
+                    top: 40,
+                    bottom: 10,
+                    left: 20,
+                    right: 20,
+                  }}
+                >
+                  <XAxis dataKey="day" stroke="white" fill="white" />
+                  <ChartTooltip
+                    cursor={false}
+                    content={
+                      <ChartTooltipContent
+                        indicator="line"
+                        nameKey="accuracy"
+                        hideLabel
+                        hideIndicator
+                      />
+                    }
+                  />
+                  <Line
+                    dataKey="accuracy"
+                    type="natural"
+                    stroke="#00ffff"
+                    strokeWidth={1}
+                    dot={({ payload, ...props }) => {
+                      return (
+                        <Dot
+                          key={payload.day}
+                          r={3}
+                          cx={props.cx}
+                          cy={props.cy}
+                          fill={payload.fill}
+                          stroke={"transparent"}
+                        />
+                      );
+                    }}
+                  />
+                </LineChart>
+              </ChartContainer>
             </div>
-            <div className="w-full h-full backdrop-blur-sm bg-white/5 p-6 rounded-2xl shadow-lg relative row-span-2 col-span-2"></div>
-            <div className="w-full h-full backdrop-blur-sm bg-white/5 p-6 rounded-2xl shadow-lg relative">
-              <div className="absolute top-0 left-0 w-full h-full border border-[#d0ffffa1] mask-gradient-2 rounded-2xl"/>
+            <div className="w-full h-full backdrop-blur-sm bg-white/5 p-6 rounded-2xl shadow-lg relative row-span-2 col-span-1">
+            <span className="text-white/80">Average Pressure Distribution</span>
+            <Cube />
+            </div>
+            <div className="w-full h-full backdrop-blur-sm bg-white/5 p-6 rounded-2xl shadow-lg relative col-span-1">
+              <div className="absolute top-0 left-0 w-full h-full border border-[#d0ffffa1] mask-gradient-2 rounded-2xl" />
+              <span className="text-white/80">Daily Steps</span>
+              <Radial seed={_patient?.recentData} />
             </div>
           </div>
           <div
