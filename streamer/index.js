@@ -23,20 +23,28 @@ port.open(function (err) {
 })
 
 const history = []
-const vals = []
 
 // Switches the port into "flowing mode"
-const parser = port.pipe(new ReadlineParser({delimiter: '\r\n'}))
+const parser = port.pipe(new ReadlineParser({delimiter: '\n'}))
 parser.on('data', (data) => {
-	history.push(Number(data))
-	const val = history.reduce((acc, c) => acc + c, 0) / history.length
-	vals.push(val)
-	if (coreWs && vals.length >= 5) {
-		coreWs.send(vals[vals.length-1]);
-		vals.filter((_) => false);
+	console.log(data);
+	history.push(JSON.parse(data))
+
+	let avg = history[0];
+	for (let i = 1; i < history.length; i++) {
+		for (const key in history[i]) {
+			avg[key] += history[i][key];
+		}
 	}
 
-	console.log(val);
+	for (const key in avg) {
+		avg[key] /= history.length;
+	}
+
+	if (coreWs) {
+		coreWs.send(JSON.stringify(avg));
+	}
+
 	if (history.length > 20) {
 		history.shift()
 	}
