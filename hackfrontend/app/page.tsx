@@ -213,7 +213,6 @@ export default function Home() {
                             }}
                         >
                             <RealtimeSvg fill={currentView != 0 ? "#fff" : "#2C7E85"}/>
-                            >>>>>>> origin/Front-end
                         </div>
 
                         <div
@@ -377,7 +376,7 @@ export default function Home() {
                             </ChartContainer>
                         </div>
                         <div
-                            className="w-full h-full backdrop-blur-sm bg-white/5 p-6 rounded-2xl shadow-lg relative row-span-2 col-span-1">
+                            className="w-full overflow-hidden h-full backdrop-blur-sm bg-white/5 p-6 rounded-2xl shadow-lg relative row-span-2 col-span-1">
                             <span className="text-white/80">Average Pressure Distribution</span>
                             <Cube/>
                         </div>
