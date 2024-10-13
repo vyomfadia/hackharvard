@@ -149,6 +149,13 @@ export default function Home() {
     const ws = useRef<WebSocket | null>(null);
     const dataPoint = useRef<Object | null>(null);
 
+    useEffect(() => {
+        ws.current = new WebSocket("ws://localhost:8087");
+        ws.current.onmessage = (e) => {
+            dataPoint.current = JSON.parse(e.data);
+        }
+    }, []);
+
     useLayoutEffect(() => {
         const updateMatrix = async () => {
             await sleep(100);

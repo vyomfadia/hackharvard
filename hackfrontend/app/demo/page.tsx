@@ -64,7 +64,7 @@ export default function Home() {
     useEffect(() => {
         ws.current = new WebSocket("ws://localhost:8087");
         ws.current.onmessage = (e) => {
-            dataPoint.current = Number(e.data);
+            dataPoint.current = JSON.parse(e.data);
         }
     }, []);
 
